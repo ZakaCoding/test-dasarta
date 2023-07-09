@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Sales\CostumerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,17 +21,32 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+// check connection
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => true,
+        'message' => 'pong!',
+        'data' => null
+    ]);
+});
+
 // Authtentication with JWT
 Route::controller(AuthController::class)->group(function() {
     Route::post('/login', 'login');
     Route::post('/register', 'register');
     Route::post('/logout', 'logout');
-    Route::post('/password/reset', 'passwordReset');
+    Route::put('/password/reset/{id}', 'passwordReset');
     Route::post('/refresh', 'refresh');
     Route::get('/profile', 'profile');
 });
 
-// check connection
-Route::get('/ping', function () {
-    return 'pong';
+Route::controller(CostumerController::class)->group(function() {
+    Route::post('/customer', 'store');
+    Route::put('/customer/{id}', 'update');
+    Route::delete('/customer/{id}', 'destroy');
 });
+
+Route::post(
+    '/sales',
+    SalesController::class
+)->middleware('auth:api');

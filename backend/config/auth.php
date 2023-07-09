@@ -41,6 +41,7 @@ return [
             'provider' => 'users',
         ],
 
+        // set as admins
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',

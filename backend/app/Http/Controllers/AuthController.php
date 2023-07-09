@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -72,6 +73,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'role' => 'required|string',
         ]);
 
         if($validate->fails())
@@ -83,6 +85,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role
         ]);
 
         return response()->json([
@@ -99,9 +102,26 @@ class AuthController extends Controller
         return $this->createNewToken(Auth::refresh());
     }
 
-    public function passwordReset()
+    public function passwordReset(Request $request, string $id)
     {
-        return '';
+        try {
+            User::find($id)
+                ->update([
+                    'password' => password_hash($request->password, PASSWORD_BCRYPT),
+                    'updated_at' => Carbon::now()
+                ]);
+        } catch (\Exception $e) {
+            return response()->json([
+               'status' => true,
+               'message' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User update successfully',
+            'data' => null
+        ], 200);
     }
 
     public function profile()
